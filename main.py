@@ -32,7 +32,7 @@ def get_login_token(*, response: Response, session_token: str = Cookie(None)):
     if session_token in app.tokens:
         return {"token": session_token}
     else:
-        response.status_code = 401
+        #response.status_code = 401
         return response
 
 
