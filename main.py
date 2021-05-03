@@ -25,9 +25,6 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
         return response
 
 
-counter = 0
-
-
 @app.post("/login_token", status_code=201)
 def get_login_token(response: Response, session_token: str = Cookie(None)
                     , credentials: HTTPBasicCredentials = Depends(security)):
@@ -44,9 +41,6 @@ def get_login_token(response: Response, session_token: str = Cookie(None)
         return {"token": session_token}
 
     response.status_code = 401
-    global counter
-    counter += 1
-    raise Exception(credentials.username, credentials.password, session_token, counter)
     return response
 
 
