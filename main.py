@@ -20,15 +20,13 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
         app.session_token = session_token
         app.composition_to_key += 1
         response.set_cookie(key='session_token', value=session_token)
-        return {"message": "Welcome"}
     else:
         response.status_code = 401
         return response
 
 
 @app.post("/login_token", status_code=201)
-def get_login_token(*, response: Response, request: Request):
-    session_token = request.cookies['session_token']
+def get_login_token(*, response: Response, session_token: str = Cookie(None)):
     if session_token == app.session_token:
         return {"token": session_token}
     else:
