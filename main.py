@@ -10,7 +10,7 @@ app.session_token = ''
 
 
 @app.post("/login_session", status_code=201)
-def create_login_session(response: Response, login: str = '', password: str = ''):
+def create_login_session(response: Response, *, login: str = '', password: str = ''):
     if login == '4dm1n' and password == 'NotSoSecurePa$$':
         session_token = app.secret_key_sample + str(app.composition_to_key)
         app.session_token = session_token
