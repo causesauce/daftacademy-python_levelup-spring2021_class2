@@ -18,7 +18,8 @@ def create_login_session(response: Response, login: str = '', password: str = ''
         response.set_cookie(key='session_token', value=session_token)
         return {"message": "Welcome"}
     else:
-        return HTTPException(status_code=401, detail='Wrong credentials')
+        response.status_code = 401
+        return response
 
 
 @app.post("/login_token", status_code=201)
@@ -27,7 +28,8 @@ def get_login_token(response: Response, request: Request):
     if session_token == app.session_token:
         return {"token": session_token}
     else:
-        return HTTPException(status_code=401, detail='Unauthorized')
+        response.status_code = 401
+        return response
 
 
 if __name__ == '__main__':
