@@ -35,10 +35,10 @@ def get_login_token(response: Response, session_token: str = Cookie(None)
         app.session_token = session_token
         app.composition_to_key += 1
         response.set_cookie(key='session_token', value=session_token)
-        return {"token": session_token}
+        return {"token": app.session_token}
 
     if session_token == app.session_token:
-        return {"token": session_token}
+        return {"token": app.session_token}
 
     response.status_code = 401
     return response
