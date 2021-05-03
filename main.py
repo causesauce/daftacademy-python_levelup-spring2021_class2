@@ -27,14 +27,12 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
         return response
 
 
-@app.post("/login_token", status_code=201)
+@app.post("/login_token", status_code=401)
 def get_login_token(*, response: Response, session_token: str = Cookie(None)):
     if session_token in app.tokens:
+        response.status_code = 201
         return {"token": session_token}
-    else:
-        #response.status_code = 401
-        return response
-
+    
 
 if __name__ == '__main__':
     uvicorn.run(app)
