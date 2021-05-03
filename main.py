@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Response, Cookie, HTTPException, Request
-
+from fastapi import FastAPI, Response, Cookie, HTTPException, Request, Depends
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uvicorn
 
 app = FastAPI()
@@ -8,9 +8,13 @@ app.secret_key_sample = 'qwerty'
 app.composition_to_key = 1
 app.session_token = ''
 
+security = HTTPBasic()
+
 
 @app.post("/login_session", status_code=201)
-def create_login_session(response: Response, *, login: str = '', password: str = ''):
+def create_login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    login = credentials.username
+    password = credentials.password
     if login == '4dm1n' and password == 'NotSoSecurePa$$':
         session_token = app.secret_key_sample + str(app.composition_to_key)
         app.session_token = session_token
@@ -23,7 +27,7 @@ def create_login_session(response: Response, *, login: str = '', password: str =
 
 
 @app.post("/login_token", status_code=201)
-def get_login_token(response: Response, request: Request):
+def get_login_token(*, response: Response, request: Request):
     session_token = request.cookies['session_token']
     if session_token == app.session_token:
         return {"token": session_token}
