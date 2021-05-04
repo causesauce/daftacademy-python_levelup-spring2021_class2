@@ -1,254 +1,135 @@
-import secrets
-from hashlib import sha256
-
-from fastapi import FastAPI, Response, Cookie, HTTPException, Request, Depends
+from fastapi import FastAPI, Request, Response, Cookie, Depends, HTTPException
+from fastapi.templating import Jinja2Templates
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from fastapi.responses import RedirectResponse
-import uvicorn
-from starlette import status
-from starlette.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+import datetime
+from pydantic import BaseModel
+from hashlib import sha256
+import secrets
+import random
 
 app = FastAPI()
-
-app.secret_key = "very constant and random secret, best 64+ characters, I love elephants and bananas"
-app.key_counter = 1
-app.access_tokens = []
-
+#templates = Jinja2Templates(directory="templates")
 security = HTTPBasic()
+random.seed(datetime.datetime.now())
+
+app.stored_login_session = []
+app.stored_login_token = []
 
 
-@app.get("/welcome_session")
-def welcome_session(response: Response, format: str = None, token: str = Cookie(None)):
-    print("token:", token)
+# zad. 3.1
 
-    if (token is not None) and (token in app.access_tokens):
-        response.status_code = status.HTTP_200_OK
-
-        if format == 'json':
-            response.media_type = 'json'
-            return {"message": "Welcome!"}
-        else:
-            if format == 'html':
-                response.media_type = 'html'
-                return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
-            else:
-                response.media_type = 'plain'
-                return Response("Welcome!", 200, media_type='text/plain')
-
-    else:
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return response
+# @app.get("/hello")
+# def print_date(request: Request, response: Response):
+#     return_date = datetime.date.today()
+#     # response.headers["content-type"] = "text/html"
+#     return templates.TemplateResponse("hello.html", {"request": request, "date": return_date})
 
 
-@app.get("/welcome_token")
-def welcome_token(response: Response, token: str = None, format: str = None):
-    print("token:", token)
+# zad. 3.2
 
-    if (token is not None) and (token in app.access_tokens):
-        response.status_code = status.HTTP_200_OK
-
-        if format == 'json':
-            response.media_type = 'json'
-            return {"message": "Welcome!"}
-        else:
-            if format == 'html':
-                response.media_type = 'html'
-                return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
-            else:
-                response.media_type = 'plain'
-                return Response("Welcome!", 200, media_type='text/plain')
-
-    else:
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return response
-
-
-@app.post("/login_session")
+@app.get("/login_session", status_code=201)
+@app.post("/login_session", status_code=201)
 def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
-    response.status_code = status.HTTP_201_CREATED
-
     correct_username = secrets.compare_digest(credentials.username, "4dm1n")
     correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
 
     if not (correct_username and correct_password):
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return response
+        raise HTTPException(status_code=401)
 
-    session_token = sha256(f"{correct_username}{correct_password}{app.secret_key}".encode()).hexdigest()
-    app.access_tokens.append(session_token)
-    response.set_cookie(key="token", value=session_token)
+    session_token = sha256(
+        f"{credentials.username}{credentials.password}{str(random.randint(0, 12345))}".encode()).hexdigest()
+    # session_token = "A" # tymczasowy token
+    response.set_cookie(key="session_token", value=session_token)  # ustawianie cookie
+    app.stored_login_session.append(session_token)  # dodawanie session token
 
-    return response
-
-
-@app.post("/login_token")
-def login_token(*, response: Response, credentials: HTTPBasicCredentials = Depends(security),
-                session_token: str = Cookie(None)):
-    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
-    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
-
-    if correct_username and correct_password:
-        preparing_session_token = sha256(f"{correct_username}{correct_password}{app.secret_key}".encode()).hexdigest()
-        app.access_tokens.append(preparing_session_token)
-        response.set_cookie(key="token", value=preparing_session_token)
-
-        response.status_code = status.HTTP_201_CREATED
-        return {"token": preparing_session_token}
-
-    if session_token in app.access_tokens:
-        response.status_code = status.HTTP_201_CREATED
-        return {"token": session_token}
-    else:
-        response.status_code = status.HTTP_401_UNAUTHORIZED
-        return response
+    if len(app.stored_login_session) > 3:
+        app.stored_login_session.pop(0)
 
 
-# 3.4
-
-@app.delete("/logout_session")
-def logout_session(response: Response, token: str = '', format: str = '',
-                 credentials: HTTPBasicCredentials = Depends(security),
-                 session_token: str = Cookie(None)):
-    if token is None or token not in app.access_tokens:
-        response.status_code = 401
-        return response
-
+@app.get("/login_token", status_code=201)
+@app.post("/login_token", status_code=201)
+def login_token(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, "4dm1n")
     correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
 
     if not (correct_username and correct_password):
-        response.status_code = 401
-        return response
+        raise HTTPException(status_code=401)
 
-    app.access_tokens = []
+    session_token = sha256(
+        f"{credentials.username}{credentials.password}{str(random.randint(0, 12345))}".encode()).hexdigest()
+    # session_token = "AA" # tymczasowy token
+    app.stored_login_token.append(session_token)  # dodawanie login token
 
-    return RedirectResponse(
-        f'/logout_token/?format={format}',
-        status_code=302
-    )
+    if len(app.stored_login_token) > 3:
+        app.stored_login_token.pop(0)
 
-
-@app.delete("/logout_token")
-def logout_token(response: Response, token: str = '', format: str = '',
-                 credentials: HTTPBasicCredentials = Depends(security),
-                 session_token: str = Cookie(None)):
-    if token is None or token not in app.access_tokens:
-        response.status_code = 401
-        return response
-
-    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
-    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
-
-    if not (correct_username and correct_password):
-        response.status_code = 401
-        return response
-
-    app.access_tokens = []
-
-    return RedirectResponse(
-        f'/logout_token/?format={format}',
-        status_code=302
-    )
+    return {"token": session_token}
 
 
-@app.get("/logged_out/{format}")
-def logged_out(response: Response, format: str):
+# zad. 3.3
+
+@app.get("/welcome_session", status_code=200)
+def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.stored_login_session) or (session_token == ""):
+        raise HTTPException(status_code=401, detail="Unathorised")
+
     if format == 'json':
-        response.media_type = 'json'
-        return {"message": "Logged out!"}
+        return {"message": "Welcome!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
     else:
-        if format == 'html':
-            response.media_type = 'html'
-            return HTMLResponse("<h1>Logged out!</h1>", status_code=200, media_type='text/html')
-        else:
-            response.media_type = 'plain'
-            return Response("Logged out!", 200, media_type='text/plain')
+        return PlainTextResponse(content="Welcome!")
 
 
-if __name__ == "__main__":
-    uvicorn.run(app)
+@app.get("/welcome_token", status_code=200)
+def welcome_token(response: Response, token: str, format: str = ""):
+    if (token not in app.stored_login_token) or (token == ""):
+        raise HTTPException(status_code=401, detail="Unathorised")
 
-#
-# app = FastAPI()
-#
-# app.secret_key_sample = 'qwerty'
-#
-# app.session_token = 'adwqdwqdqwdwdqw'
-#
-# security = HTTPBasic()
-#
-#
-# @app.get("/welcome_session", status_code=401)
-# def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None)):
-#
-#     if session_token == app.session_token:
-#         response.status_code = 200
-#
-#         if format == 'json':
-#             response.media_type = 'json'
-#             return {"message": "Welcome!"}
-#         else:
-#             if format == 'html':
-#                 response.media_type = 'html'
-#                 return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
-#             else:
-#                 response.media_type = 'plain'
-#                 return Response("Welcome!", 200, media_type='text/plain')
-#
-#
-# @app.get("/welcome_token", status_code=401)
-# def welcome_token(response: Response, token: str = '', format: str = ''):
-#
-#     session_token = token
-#
-#     if session_token == app.session_token:
-#         response.status_code = 200
-#
-#         if format == 'json':
-#             response.media_type = 'json'
-#             return {"message": "Welcome!"}
-#         else:
-#             if format == 'html':
-#                 response.media_type = 'html'
-#                 return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
-#             else:
-#                 response.media_type = 'plain'
-#                 return Response("Welcome!", 200, media_type='text/plain')
-#
-#
-# @app.post("/login_session", status_code=201)
-# def create_login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
-#     login = credentials.username
-#     password = credentials.password
-#     if login == '4dm1n' and password == 'NotSoSecurePa$$':
-#
-#         session_token = app.secret_key_sample
-#         app.session_token = session_token
-#
-#         response.set_cookie(key='token', value=session_token)
-#     else:
-#         response.status_code = 401
-#         return response
-#
-#
-# @app.post("/login_token", status_code=201)
-# def get_login_token(response: Response, session_token: str = Cookie(None)
-#                     , credentials: HTTPBasicCredentials = Depends(security)):
-#     login = credentials.username
-#     password = credentials.password
-#     if login == '4dm1n' and password == 'NotSoSecurePa$$':
-#         session_token = app.secret_key_sample
-#         app.session_token = session_token
-#
-#         response.set_cookie(key='token', value=session_token)
-#         return {"token": app.session_token}
-#
-#     if session_token == app.session_token:
-#         return {"token": app.session_token}
-#
-#     response.status_code = 401
-#     return response
-#
-#
-# if __name__ == '__main__':
-#     uvicorn.run(app)
+    if format == 'json':
+        return {"message": "Welcome!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
+    else:
+        return PlainTextResponse(content="Welcome!")
+
+
+# zad. 3.4 // 3.5
+
+@app.get("/logout_session")
+@app.delete("/logout_session")
+def logout_session(session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.stored_login_session) and (session_token not in app.stored_login_token):
+        raise HTTPException(status_code=401, detail="Unathorised")
+
+    if session_token in app.stored_login_session:
+        app.stored_login_session.remove(session_token)
+    else:
+        app.stored_login_token.remove(session_token)
+
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+
+
+@app.get("/logout_token")
+@app.delete("/logout_token")
+def logout_token(token: str, format: str = ""):
+    if ((token not in app.stored_login_token) and (token not in app.stored_login_session)) or (token == ""):
+        raise HTTPException(status_code=401, detail="Unathorised")
+
+    if token in app.stored_login_token:
+        app.stored_login_token.remove(token)
+    else:
+        app.stored_login_session.remove(token)
+
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+
+
+@app.get("/logged_out", status_code=200)
+def logged_out(format: str = ""):
+    if format == 'json':
+        return {"message": "Logged out!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Logged out!</h1>", status_code=200)
+    else:
+        return PlainTextResponse(content="Logged out!", status_code=200)
