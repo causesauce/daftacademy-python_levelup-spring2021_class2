@@ -6,7 +6,7 @@ app = FastAPI()
 
 app.secret_key_sample = 'qwerty'
 app.composition_to_key = 1
-app.session_token = ''
+app.session_token = 'adwqdwqdqwdwdqw'
 
 security = HTTPBasic()
 
@@ -18,17 +18,20 @@ def welcome_session(response: Response, format: str = '', session_token: str = C
 
         if format == 'json':
             response_string = '{"message": "Welcome!"}'
-            return Response(content=response_string, media_type='application/json', status_code=200)
+            response.media_type = 'application/json'
+            response.status_code = 200
+            return response_string
 
         if format == 'html':
-            response_string = "" \
-                              "<html>" \
-                              "<h1>Welcome!</h1>" \
-                              "</html>"
-            return Response(content=response_string, media_type='text/html', status_code=200)
+            response_string = "<h1>Welcome!</h1>"
+            response.media_type = 'text/html'
+            response.status_code = 200
+            return response_string
 
         response_string = 'Welcome!'
-        return Response(content=response_string, media_type='text/plain', status_code=200)
+        response.media_type = 'text/plain'
+        response.status_code = 200
+        return response_string
 
 
 @app.get("/welcome_token", status_code=401)
@@ -36,21 +39,24 @@ def welcome_token(response: Response, token: str = '', format: str = ''):
 
     session_token = token
 
-    if session_token is not None and session_token == app.session_token:
- 
+    if session_token == app.session_token:
+
         if format == 'json':
             response_string = '{"message": "Welcome!"}'
-            return Response(content=response_string, media_type='application/json', status_code=200)
+            response.media_type = 'application/json'
+            response.status_code = 200
+            return response_string
 
         if format == 'html':
-            response_string = "" \
-                              "<html>" \
-                              "<h1>Welcome!</h1>" \
-                              "</html>"
-            return Response(content=response_string, media_type='text/html', status_code=200)
+            response_string = "<h1>Welcome!</h1>"
+            response.media_type = 'text/html'
+            response.status_code = 200
+            return response_string
 
         response_string = 'Welcome!'
-        return Response(content=response_string, media_type='text/plain', status_code=200)
+        response.media_type = 'text/plain'
+        response.status_code = 200
+        return response_string
 
 
 @app.post("/login_session", status_code=201)
@@ -64,7 +70,6 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
         response.set_cookie(key='session_token', value=session_token)
     else:
         response.status_code = 401
-        response.set_cookie(key='session_token', value='')
         return response
 
 
@@ -84,7 +89,6 @@ def get_login_token(response: Response, session_token: str = Cookie(None)
         return {"token": app.session_token}
 
     response.status_code = 401
-    response.set_cookie(key='session_token', value='')
     return response
 
 
