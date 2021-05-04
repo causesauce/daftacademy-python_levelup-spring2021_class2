@@ -12,10 +12,7 @@ security = HTTPBasic()
 
 
 @app.get("/welcome_session", status_code=401)
-def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None),
-                    credentials: HTTPBasicCredentials = Depends(security)):
-    if not (credentials.username == '4dm1n' and credentials.password == 'NotSoSecurePa$$'):
-        return
+def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None)):
 
     if session_token == app.session_token:
 
@@ -35,10 +32,7 @@ def welcome_session(response: Response, format: str = '', session_token: str = C
 
 
 @app.get("/welcome_token", status_code=401)
-def welcome_token(response: Response, token: str = '', format: str = '',
-                  credentials: HTTPBasicCredentials = Depends(security)):
-    if not (credentials.username == '4dm1n' and credentials.password == 'NotSoSecurePa$$'):
-        return
+def welcome_token(response: Response, token: str = '', format: str = ''):
 
     session_token = token
 
