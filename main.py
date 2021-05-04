@@ -37,7 +37,7 @@ def welcome_token(response: Response, token: str = '', format: str = ''):
     session_token = token
 
     if session_token is not None and session_token == app.session_token:
-
+ 
         if format == 'json':
             response_string = '{"message": "Welcome!"}'
             return Response(content=response_string, media_type='application/json', status_code=200)
@@ -64,6 +64,7 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
         response.set_cookie(key='session_token', value=session_token)
     else:
         response.status_code = 401
+        response.set_cookie(key='session_token', value='')
         return response
 
 
@@ -83,6 +84,7 @@ def get_login_token(response: Response, session_token: str = Cookie(None)
         return {"token": app.session_token}
 
     response.status_code = 401
+    response.set_cookie(key='session_token', value='')
     return response
 
 
