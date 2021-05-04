@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response, Cookie, HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uvicorn
+from starlette.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -15,23 +16,18 @@ security = HTTPBasic()
 def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None)):
 
     if session_token == app.session_token:
+        response.status_code = 200
 
         if format == 'json':
-            response_string = '{"message": "Welcome!"}'
-            response.media_type = 'application/json'
-            response.status_code = 200
-            return response_string
-
-        if format == 'html':
-            response_string = "<h1>Welcome!</h1>"
-            response.media_type = 'text/html'
-            response.status_code = 200
-            return response_string
-
-        response_string = 'Welcome!'
-        response.media_type = 'text/plain'
-        response.status_code = 200
-        return response_string
+            response.media_type = 'json'
+            return {"message": "Welcome!"}
+        else:
+            if format == 'html':
+                response.media_type = 'html'
+                return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
+            else:
+                response.media_type = 'plain'
+                return Response("Welcome!", 200, media_type='text/plain')
 
 
 @app.get("/welcome_token", status_code=401)
@@ -40,23 +36,18 @@ def welcome_token(response: Response, token: str = '', format: str = ''):
     session_token = token
 
     if session_token == app.session_token:
+        response.status_code = 200
 
         if format == 'json':
-            response_string = '{"message": "Welcome!"}'
-            response.media_type = 'application/json'
-            response.status_code = 200
-            return response_string
-
-        if format == 'html':
-            response_string = "<h1>Welcome!</h1>"
-            response.media_type = 'text/html'
-            response.status_code = 200
-            return response_string
-
-        response_string = 'Welcome!'
-        response.media_type = 'text/plain'
-        response.status_code = 200
-        return response_string
+            response.media_type = 'json'
+            return {"message": "Welcome!"}
+        else:
+            if format == 'html':
+                response.media_type = 'html'
+                return HTMLResponse("<h1>Welcome!</h1>", status_code=200, media_type='text/html')
+            else:
+                response.media_type = 'plain'
+                return Response("Welcome!", 200, media_type='text/plain')
 
 
 @app.post("/login_session", status_code=201)
