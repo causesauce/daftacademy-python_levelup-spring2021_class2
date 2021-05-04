@@ -65,6 +65,7 @@ def create_login_session(response: Response, credentials: HTTPBasicCredentials =
     password = credentials.password
     if login == '4dm1n' and password == 'NotSoSecurePa$$':
 
+        session_token = app.secret_key_sample
         app.session_token = session_token
 
         response.set_cookie(key='token', value=session_token)
@@ -79,7 +80,7 @@ def get_login_token(response: Response, session_token: str = Cookie(None)
     login = credentials.username
     password = credentials.password
     if login == '4dm1n' and password == 'NotSoSecurePa$$':
-
+        session_token = app.secret_key_sample
         app.session_token = session_token
 
         response.set_cookie(key='token', value=session_token)
