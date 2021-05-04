@@ -11,6 +11,54 @@ app.session_token = ''
 security = HTTPBasic()
 
 
+@app.get("/welcome_session", status_code=401)
+def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None),
+                    credentials: HTTPBasicCredentials = Depends(security)):
+    if not (credentials.username == '4dm1n' and credentials.password == 'NotSoSecurePa$$'):
+        return
+
+    if session_token == app.session_token:
+
+        if format == 'json':
+            response_string = '{"message": "Welcome!"}'
+            return Response(content=response_string, media_type='application/json', status_code=200)
+
+        if format == 'html':
+            response_string = "" \
+                              "<html>" \
+                              "<h1>Welcome!</h1>" \
+                              "</html>"
+            return Response(content=response_string, media_type='text/html', status_code=200)
+
+        response_string = 'Welcome!'
+        return Response(content=response_string, media_type='text/plain', status_code=200)
+
+
+@app.get("/welcome_token", status_code=401)
+def welcome_token(response: Response, token: str = '', format: str = '',
+                  credentials: HTTPBasicCredentials = Depends(security)):
+    if not (credentials.username == '4dm1n' and credentials.password == 'NotSoSecurePa$$'):
+        return
+
+    session_token = token
+
+    if session_token is not None and session_token == app.session_token:
+
+        if format == 'json':
+            response_string = '{"message": "Welcome!"}'
+            return Response(content=response_string, media_type='application/json', status_code=200)
+
+        if format == 'html':
+            response_string = "" \
+                              "<html>" \
+                              "<h1>Welcome!</h1>" \
+                              "</html>"
+            return Response(content=response_string, media_type='text/html', status_code=200)
+
+        response_string = 'Welcome!'
+        return Response(content=response_string, media_type='text/plain', status_code=200)
+
+
 @app.post("/login_session", status_code=201)
 def create_login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     login = credentials.username
