@@ -3,6 +3,7 @@ from hashlib import sha256
 
 from fastapi import FastAPI, Response, Cookie, HTTPException, Request, Depends
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi.responses import RedirectResponse
 import uvicorn
 from starlette import status
 from starlette.responses import HTMLResponse
@@ -41,7 +42,6 @@ def welcome_session(response: Response, format: str = None, token: str = Cookie(
 
 @app.get("/welcome_token")
 def welcome_token(response: Response, token: str = None, format: str = None):
-
     print("token:", token)
 
     if (token is not None) and (token in app.access_tokens):
@@ -103,25 +103,87 @@ def login_token(*, response: Response, credentials: HTTPBasicCredentials = Depen
         return response
 
 
+# 3.4
+
+@app.delete("/logout_session")
+def logout_session(response: Response, token: str = '', format: str = '',
+                 credentials: HTTPBasicCredentials = Depends(security),
+                 session_token: str = Cookie(None)):
+    if token is None or token not in app.access_tokens:
+        response.status_code = 401
+        return response
+
+    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
+    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+
+    if not (correct_username and correct_password):
+        response.status_code = 401
+        return response
+
+    app.access_tokens = []
+
+    return RedirectResponse(
+        f'/logout_token/?format={format}',
+        status_code=302
+    )
+
+
+@app.delete("/logout_token")
+def logout_token(response: Response, token: str = '', format: str = '',
+                 credentials: HTTPBasicCredentials = Depends(security),
+                 session_token: str = Cookie(None)):
+    if token is None or token not in app.access_tokens:
+        response.status_code = 401
+        return response
+
+    correct_username = secrets.compare_digest(credentials.username, "4dm1n")
+    correct_password = secrets.compare_digest(credentials.password, "NotSoSecurePa$$")
+
+    if not (correct_username and correct_password):
+        response.status_code = 401
+        return response
+
+    app.access_tokens = []
+
+    return RedirectResponse(
+        f'/logout_token/?format={format}',
+        status_code=302
+    )
+
+
+@app.get("logged_out/{format}")
+def logged_out(response: Response, format: str):
+    if format == 'json':
+        response.media_type = 'json'
+        return {"message": "Logged out!"}
+    else:
+        if format == 'html':
+            response.media_type = 'html'
+            return HTMLResponse("<h1>Logged out!</h1>", status_code=200, media_type='text/html')
+        else:
+            response.media_type = 'plain'
+            return Response("Logged out!", 200, media_type='text/plain')
+
+
 if __name__ == "__main__":
     uvicorn.run(app)
-    
-# 
+
+#
 # app = FastAPI()
-# 
+#
 # app.secret_key_sample = 'qwerty'
-# 
+#
 # app.session_token = 'adwqdwqdqwdwdqw'
-# 
+#
 # security = HTTPBasic()
-# 
-# 
+#
+#
 # @app.get("/welcome_session", status_code=401)
 # def welcome_session(response: Response, format: str = '', session_token: str = Cookie(None)):
-# 
+#
 #     if session_token == app.session_token:
 #         response.status_code = 200
-# 
+#
 #         if format == 'json':
 #             response.media_type = 'json'
 #             return {"message": "Welcome!"}
@@ -132,16 +194,16 @@ if __name__ == "__main__":
 #             else:
 #                 response.media_type = 'plain'
 #                 return Response("Welcome!", 200, media_type='text/plain')
-# 
-# 
+#
+#
 # @app.get("/welcome_token", status_code=401)
 # def welcome_token(response: Response, token: str = '', format: str = ''):
-# 
+#
 #     session_token = token
-# 
+#
 #     if session_token == app.session_token:
 #         response.status_code = 200
-# 
+#
 #         if format == 'json':
 #             response.media_type = 'json'
 #             return {"message": "Welcome!"}
@@ -152,23 +214,23 @@ if __name__ == "__main__":
 #             else:
 #                 response.media_type = 'plain'
 #                 return Response("Welcome!", 200, media_type='text/plain')
-# 
-# 
+#
+#
 # @app.post("/login_session", status_code=201)
 # def create_login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
 #     login = credentials.username
 #     password = credentials.password
 #     if login == '4dm1n' and password == 'NotSoSecurePa$$':
-# 
+#
 #         session_token = app.secret_key_sample
 #         app.session_token = session_token
-# 
+#
 #         response.set_cookie(key='token', value=session_token)
 #     else:
 #         response.status_code = 401
 #         return response
-# 
-# 
+#
+#
 # @app.post("/login_token", status_code=201)
 # def get_login_token(response: Response, session_token: str = Cookie(None)
 #                     , credentials: HTTPBasicCredentials = Depends(security)):
@@ -177,16 +239,16 @@ if __name__ == "__main__":
 #     if login == '4dm1n' and password == 'NotSoSecurePa$$':
 #         session_token = app.secret_key_sample
 #         app.session_token = session_token
-# 
+#
 #         response.set_cookie(key='token', value=session_token)
 #         return {"token": app.session_token}
-# 
+#
 #     if session_token == app.session_token:
 #         return {"token": app.session_token}
-# 
+#
 #     response.status_code = 401
 #     return response
-# 
-# 
+#
+#
 # if __name__ == '__main__':
 #     uvicorn.run(app)
