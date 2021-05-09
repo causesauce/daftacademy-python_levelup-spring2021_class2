@@ -43,8 +43,8 @@ async def get_customers():
                   "full_address": f'{x["address"]} {x["postalcode"]} {x["City"]} {x["Country"]}'} for x in customers]
     return {"customers": customers}
 
-
-uvicorn.run(app)
+if __name__ == '__main__':
+    uvicorn.run(app)
 #
 # with sqlite3.connect('northwind.db') as conn:
 #
