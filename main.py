@@ -63,6 +63,41 @@ async def get_products(response: Response, id_prod: int):
     return products
 
 
+@app.get("/employees", status_code=200)
+async def get_employees(response: Response, limit: int = 1, offset: int = 0, order: str = 'EmployeeID'):
+    validation_list = ["FirstName", "LastName", "City"]
+    order_my = order
+
+    if order != "EmployeeID":
+        if order == 'first_name':
+            order_my = validation_list[0]
+        elif order == 'last_name':
+            order_my = validation_list[1]
+        elif order == 'city':
+            order_my = validation_list[2]
+        else:
+            response.status_code = 400
+            return
+
+    limit_my = limit
+    offset_my = offset
+
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    employees = cursor.execute(
+        f"""select EmployeeID id, LastName last_name, FirstName first_name, City city 
+        from Employees 
+        order by {order_my} 
+        LIMIT {limit_my} OFFSET {offset_my};"""
+    ).fetchall()
+
+    if employees is None:
+        response.status_code = 404
+        return
+    return dict(employees=employees)
+
+
 if __name__ == '__main__':
     uvicorn.run(app)
 #
