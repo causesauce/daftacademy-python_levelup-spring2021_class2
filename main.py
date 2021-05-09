@@ -15,21 +15,21 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     app.db_connection.close()
-#
-#
-# @app.get("/categories", status_code=200)
-# async def get_categories():
-#     conn = app.db_connection
-#     cursor = conn.cursor()
-#     cursor.row_factory = sqlite3.Row
-#     categories = cursor.execute(""
-#                                 "select categoryid, categoryname "
-#                                 "from categories "
-#                                 "order by categoryid").fetchall()
-#     categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
-#     return {"categories": categories}
-#
-#
+
+
+@app.get("/categories", status_code=200)
+async def get_categories():
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    categories = cursor.execute(""
+                                "select categoryid, categoryname "
+                                "from categories "
+                                "order by categoryid").fetchall()
+    categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
+    return {"categories": categories}
+
+# 
 # @app.get("/customers", status_code=200)
 # async def get_customers():
 #     conn = app.db_connection
@@ -46,12 +46,12 @@ async def shutdown():
 #     return {"customers": customers}
 
 
-@app.get("/categories")
-async def get_categories():
-    cursor = app.db_connection.cursor()
-    categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-    output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
-    return output
+# @app.get("/categories")
+# async def get_categories():
+#     cursor = app.db_connection.cursor()
+#     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
+#     output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
+#     return output
 
 
 @app.get("/customers")
