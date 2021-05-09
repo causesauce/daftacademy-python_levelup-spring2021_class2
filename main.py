@@ -29,42 +29,34 @@ async def get_categories():
     categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
     return {"categories": categories}
 
-# 
-# @app.get("/customers", status_code=200)
-# async def get_customers():
-#     conn = app.db_connection
-#     cursor = conn.cursor()
-#     cursor.row_factory = sqlite3.Row
-#     customers = cursor.execute(""
-#                                "select CustomerID, CompanyName, COALESCE(Address, '') "
-#                                "|| ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || "
-#                                "' ' || COALESCE(Country, '')) as full_address "
-#                                "from customers "
-#                                "ORDER BY UPPER(CustomerID)").fetchall()
-#     customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
-#                   "full_address": f'{x["full_address"]}'} for x in customers]
-#     return {"customers": customers}
 
-
-# @app.get("/categories")
-# async def get_categories():
-#     cursor = app.db_connection.cursor()
-#     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-#     output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
-#     return output
-
-
-@app.get("/customers")
+@app.get("/customers", status_code=200)
 async def get_customers():
-    cursor = app.db_connection.cursor()
+    conn = app.db_connection
+    cursor = conn.cursor()
     cursor.row_factory = sqlite3.Row
-    customers = cursor.execute(
-        "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
-        "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
-        "COALESCE(Country, '') full_address "
-        "FROM Customers c ORDER BY UPPER(CustomerID);"
-    ).fetchall()
+    customers = cursor.execute(""
+                               "select CustomerID id, COALESCE(CompanyName, '') name, COALESCE(Address, '') "
+                               "|| ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || "
+                               "' ' || COALESCE(Country, '')) as full_address "
+                               "from customers "
+                               "ORDER BY UPPER(CustomerID)").fetchall()
+    # customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
+    #               "full_address": f'{x["full_address"]}'} for x in customers]
     return dict(customers=customers)
+
+# 
+# @app.get("/customers")
+# async def get_customers():
+#     cursor = app.db_connection.cursor()
+#     cursor.row_factory = sqlite3.Row
+#     customers = cursor.execute(
+#         "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
+#         "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
+#         "COALESCE(Country, '') full_address "
+#         "FROM Customers c ORDER BY UPPER(CustomerID);"
+#     ).fetchall()
+#     return dict(customers=customers)
 
 
 if __name__ == '__main__':
