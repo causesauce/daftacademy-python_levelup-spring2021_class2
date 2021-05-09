@@ -26,7 +26,6 @@ async def get_categories():
                                 "select categoryid id, categoryname name "
                                 "from categories "
                                 "order by categoryid").fetchall()
-    # categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
     return dict(categories=categories)
 
 
@@ -43,11 +42,26 @@ async def get_customers():
         "from customers "
         "ORDER BY UPPER(CustomerID);"
     ).fetchall()
-    # customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
-    #               "full_address": f'{x["full_address"]}'} for x in customers]
     return dict(customers=customers)
 
 
+@app.get("/products/{id_prod}", status_code=200)
+async def get_products(response: Response, id_prod: int):
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    products = cursor.execute(
+        "select ProductID id, ProductName name "
+        "from Products "
+        "where ProductID = ?",
+        (id_prod,)
+    ).fetchone()
+    # customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
+    #               "full_address": f'{x["full_address"]}'} for x in customers]
+    if products is None:
+        response.status_code = 404
+        return
+    return dict(products=products)
 
 
 if __name__ == '__main__':
