@@ -36,11 +36,12 @@ async def get_customers():
     cursor = conn.cursor()
     cursor.row_factory = sqlite3.Row
     customers = cursor.execute(""
-                               "select CustomerID, CompanyName, address, postalcode, City, Country "
+                               "select CustomerID, CompanyName, IFNULL(Address, '') || ' ' || IFNULL(PostalCode, '') "
+                               "|| ' ' ||  IFNULL(City, '') || ' ' || IFNULL(Country, '') as full_address "
                                "from customers "
                                "order by CustomerID").fetchall()
     customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
-                  "full_address": f'{x["address"]} {x["postalcode"]} {x["City"]} {x["Country"]}'} for x in customers]
+                  "full_address": f'{x["full_address"]}'} for x in customers]
     return {"customers": customers}
 
 if __name__ == '__main__':
