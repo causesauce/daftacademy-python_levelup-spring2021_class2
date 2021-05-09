@@ -56,12 +56,11 @@ async def get_products(response: Response, id_prod: int):
         "where ProductID = ?",
         (id_prod,)
     ).fetchone()
-    # customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
-    #               "full_address": f'{x["full_address"]}'} for x in customers]
+
     if products is None:
         response.status_code = 404
         return
-    return dict(products=products)
+    return products
 
 
 if __name__ == '__main__':
