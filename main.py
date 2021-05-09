@@ -23,11 +23,11 @@ async def get_categories():
     cursor = conn.cursor()
     cursor.row_factory = sqlite3.Row
     categories = cursor.execute(""
-                                "select categoryid, categoryname "
+                                "select categoryid id, categoryname name "
                                 "from categories "
                                 "order by categoryid").fetchall()
-    categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
-    return {"categories": categories}
+    # categories = [{'id': f'{x["categoryid"]}', 'name': f'{x["categoryname"]}'} for x in categories]
+    return dict(categories=categories)
 
 
 @app.get("/customers", status_code=200)
@@ -48,18 +48,6 @@ async def get_customers():
     return dict(customers=customers)
 
 
-#
-# @app.get("/customers")
-# async def get_customers():
-#     cursor = app.db_connection.cursor()
-#     cursor.row_factory = sqlite3.Row
-#     customers = cursor.execute(
-#         "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
-#         "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
-#         "COALESCE(Country, '') full_address "
-#         "FROM Customers c ORDER BY UPPER(CustomerID);"
-#     ).fetchall()
-#     return dict(customers=customers)
 
 
 if __name__ == '__main__':
