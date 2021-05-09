@@ -34,12 +34,14 @@ async def get_categories():
 async def get_customers():
     conn = app.db_connection
     cursor = conn.cursor()
-    data = cursor.execute(
-        """SELECT CustomerId AS id, CompanyName AS name,
-          Address || ' ' || PostalCode || ' ' || City || ' ' || Country AS full_address FROM customers""").fetchall()
-    return {
-        'customers': data
-    }
+    cursor.row_factory = sqlite3.Row
+    customers = cursor.execute(""
+                               "select CustomerID, CompanyName, address, postalcode, City, Country "
+                               "from customers "
+                               "order by CustomerID").fetchall()
+    customers = [{"id": f'{x["CustomerID"]}', "name": f'{x["CompanyName"]}',
+                  "full_address": f'{x["address"]} {x["postalcode"]} {x["City"]} {x["Country"]}'} for x in customers]
+    return {"customers": customers}
 
 if __name__ == '__main__':
     uvicorn.run(app)
