@@ -114,6 +114,41 @@ async def get_products_extended():
     return dict(products_extended=products_extended)
 
 
+@app.get("/products/{id}/orders", status_code=200)
+async def get_order_with_product(response: Response, id: int):
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    product = cursor.execute(
+        """select productid
+        from products
+        where productid = ? ;
+        """,
+        (id,)
+    ).fetchall()
+
+    if len(product) < 1:
+        response.status_code = 400
+        return
+
+    orders = cursor.execute(
+        """select o.OrderId id, c.CompanyName customer, od.quantity quantity,
+        ((od.UnitPrice * od.quantity) - (od.Discount * (od.UnitPrice * od.quantity))) total_price
+        from Orders o 
+        join customers c on o.customerid = c.customerid
+        join 'Order Details' od on o.orderid = od.orderid 
+        join products p on od.productid = p.productid
+        where p.productid = ?
+        order by o.orderid;
+        """,
+        (id,)
+    ).fetchall()
+
+    return dict(orders=orders)
+
+
+# ((od.UnitPrice * od.quantity) - (od.Discount * (od.UnitPrice * od.quantity)) total_price
+
 if __name__ == '__main__':
     uvicorn.run(app)
 #
