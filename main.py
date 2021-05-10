@@ -98,6 +98,22 @@ async def get_employees(response: Response, limit: int = 1, offset: int = 0, ord
     return dict(employees=employees)
 
 
+@app.get("/products_extended", status_code=200)
+async def get_products_extended():
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    products_extended = cursor.execute(
+        """select p.ProductID id, p.ProductName name, c.CategoryName category, s.CompanyName supplier
+        from Products p 
+        join categories c on p.categoryid = c.categoryid
+        join suppliers s on p.supplierid = s.supplierid
+        order by p.ProductID;
+        """
+    ).fetchall()
+    return dict(products_extended=products_extended)
+
+
 if __name__ == '__main__':
     uvicorn.run(app)
 #
