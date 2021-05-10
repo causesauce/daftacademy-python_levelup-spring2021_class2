@@ -133,8 +133,8 @@ async def get_order_with_product(response: Response, id: int):
 
     orders = cursor.execute(
         """select COALESCE(o.OrderId, '') id, COALESCE(c.CompanyName, '') customer, COALESCE(od.quantity, '') quantity,
-        ((COALESCE(od.UnitPrice, 0) * COALESCE(od.quantity, 0)) - (COALESCE(od.Discount, 0) * (COALESCE(od.UnitPrice, 0)
-         * COALESCE(od.quantity, 0)))) total_price
+        Round(((COALESCE(od.UnitPrice, 0) * COALESCE(od.quantity, 0)) - (COALESCE(od.Discount, 0) * (COALESCE(od.UnitPrice, 0)
+         * COALESCE(od.quantity, 0)))), 2) total_price
         from Orders o 
         join customers c on o.customerid = c.customerid
         join 'Order Details' od on o.orderid = od.orderid 
