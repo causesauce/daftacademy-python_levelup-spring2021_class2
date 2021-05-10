@@ -128,7 +128,7 @@ async def get_order_with_product(response: Response, id: int):
     ).fetchall()
 
     if len(product) < 1:
-        response.status_code = 400
+        response.status_code = 404
         return
 
     orders = cursor.execute(
@@ -139,7 +139,7 @@ async def get_order_with_product(response: Response, id: int):
         join 'Order Details' od on o.orderid = od.orderid 
         join products p on od.productid = p.productid
         where p.productid = ?
-        order by o.orderid;
+        order by o.OrderId;
         """,
         (id,)
     ).fetchall()
