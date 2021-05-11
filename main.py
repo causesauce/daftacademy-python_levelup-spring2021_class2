@@ -213,6 +213,7 @@ async def upd_category(id: int, name: Name, response: Response):
         """,
         (id,)
     ).fetchone()
+    app.db_connection.commit()
 
     return record
 
