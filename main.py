@@ -179,6 +179,44 @@ async def create_category(name: Name):
     return new_record
 
 
+@app.put("/categories/{id}", status_code=201)
+async def upd_category(id: int, name: Name, response: Response):
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+
+    record = cursor.execute(
+        """
+            select categoryid id 
+            from categories
+            where categoryid = ?;
+        """,
+        (id,)
+    ).fetchone()
+    if record is None:
+        response.status_code = 404
+        return
+
+    cursor.execute(
+        """
+        update  categories
+        set categoryname = ?
+        where categoryid = ?
+        """,
+        (name.name,id)
+    )
+    record = cursor.execute(
+        """
+            select categoryid id, categoryname name 
+            from categories
+            where categoryid = ?;
+        """,
+        (id,)
+    ).fetchone()
+    
+    return record
+
+
 if __name__ == '__main__':
     uvicorn.run(app)
 #
