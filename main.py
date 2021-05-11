@@ -244,6 +244,15 @@ async def delete_category(id: int, response: Response):
         """,
         (id,)
     )
+
+    record = cursor.execute(
+        """
+            select categoryid deleted
+            from categories
+            where categoryid = ?;
+        """,
+        (1,)
+    ).fetchone()
     app.db_connection.commit()
     return record
 
