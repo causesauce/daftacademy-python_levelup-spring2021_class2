@@ -1,6 +1,7 @@
 import sqlite3
 from fastapi import FastAPI, Response, Cookie, HTTPException, Request, Depends
 import uvicorn
+from pydantic import BaseModel
 
 app = FastAPI()
 app.db_connection = None
@@ -148,7 +149,35 @@ async def get_order_with_product(response: Response, id: int):
     return dict(orders=orders)
 
 
-# ((od.UnitPrice * od.quantity) - (od.Discount * (od.UnitPrice * od.quantity)) total_price
+class Name(BaseModel):
+    name: str
+    #
+    # def __init__(self, ):
+    #     self.name = name
+
+
+@app.post("/categories", status_code=201)
+async def create_category(name: Name):
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+    cursor.execute(
+        """
+        insert into categories
+        values((select max(categoryid)+1 from categories), ?, null, null)
+        """,
+        (name.name,)
+    )
+    new_record = cursor.execute(
+        """
+            select categoryid id, categoryname name 
+            from categories
+            where categoryid = (select max(categoryid) from categories);
+        """
+    ).fetchone()
+
+    return new_record
+
 
 if __name__ == '__main__':
     uvicorn.run(app)
