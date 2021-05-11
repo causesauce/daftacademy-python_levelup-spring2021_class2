@@ -179,7 +179,7 @@ async def create_category(name: Name):
     return new_record
 
 
-@app.put("/categories/{id}", status_code=201)
+@app.put("/categories/{id}", status_code=200)
 async def upd_category(id: int, name: Name, response: Response):
     conn = app.db_connection
     cursor = conn.cursor()
@@ -203,7 +203,7 @@ async def upd_category(id: int, name: Name, response: Response):
         set categoryname = ?
         where categoryid = ?
         """,
-        (name.name,id)
+        (name.name, id)
     )
     record = cursor.execute(
         """
@@ -213,7 +213,37 @@ async def upd_category(id: int, name: Name, response: Response):
         """,
         (id,)
     ).fetchone()
-    
+
+    return record
+
+
+@app.delete("/categories/{id}", status_code=200)
+async def delete_category(id: int, response: Response):
+    conn = app.db_connection
+    cursor = conn.cursor()
+    cursor.row_factory = sqlite3.Row
+
+    record = cursor.execute(
+        """
+            select categoryid deleted
+            from categories
+            where categoryid = ?;
+        """,
+        (id,)
+    ).fetchone()
+
+    if record is None:
+        response.status_code = 404
+        return
+    cursor.execute(
+        """
+            delete 
+            from categories
+            where categoryid = ?;
+        """,
+        (id,)
+    )
+
     return record
 
 
