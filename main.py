@@ -244,7 +244,7 @@ async def delete_category(id: int, response: Response):
         """,
         (id,)
     )
-
+    app.db_connection.commit()
     return record
 
 
