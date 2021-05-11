@@ -175,7 +175,7 @@ async def create_category(name: Name):
             where categoryid = (select max(categoryid) from categories);
         """
     ).fetchone()
-
+    app.db_connection.commit()
     return new_record
 
 
