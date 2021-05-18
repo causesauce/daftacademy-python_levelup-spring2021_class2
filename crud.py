@@ -52,3 +52,5 @@ def add_supplier(supplier: schemas.Supplier, db: Session):
     )
     db.add(supp)
     db.commit()
+
+    return supplier
