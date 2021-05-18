@@ -37,9 +37,9 @@ async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
 
 
 def main():
-    app.include_router(router, tags=["northwind"])
-    uvicorn.run(app)
+    pass
 
 
 if __name__ == '__main__':
-    main()
+    app.include_router(router, tags=["northwind"])
+    uvicorn.run(app)
