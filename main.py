@@ -1,3 +1,5 @@
+from typing import Optional
+
 import uvicorn
 from fastapi import APIRouter, Depends, HTTPException, FastAPI
 from pydantic import PositiveInt
@@ -102,7 +104,7 @@ async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
     # return db_products
 
 
-@app.get("/suppliers/{id}/")
+@app.get("/suppliers/{id}")
 async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
     db_supps = crud.get_supplier(db, id)
     if db_supps is None:
@@ -116,8 +118,8 @@ async def post_supplier(supplier: schemas.NewSupplier, db: Session = Depends(get
     return supp
 
 
-@app.put("/suppliers/{id}")
-async def put_supplier(id: PositiveInt, supplier_upd: schemas.UpdateSupplier, db: Session = Depends(get_db)):
+@app.put("/suppliers/{id}", status_code=200)
+async def put_supplier(id: PositiveInt, supplier_upd: Optional[schemas.UpdateSupplier], db: Session = Depends(get_db)):
     result = crud.update_supplier(id, supplier_upd, db)
     if result:
         return result
