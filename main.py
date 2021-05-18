@@ -28,7 +28,17 @@ async def get_suppliers(db: Session = Depends(get_db)):
     return db_supps
 
 
-@app.get("/suppliers/{id}")
+@app.get("/suppliers/{id}/products")
+async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
+    db_supp = crud.get_supplier(db, id)
+    if db_supp is None:
+        raise HTTPException(status_code=404)
+
+    db_products = crud.get_products(db, id)
+    return db_products
+
+
+@app.get("/suppliers/{id}/")
 async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
     db_supps = crud.get_supplier(db, id)
     if db_supps is None:
@@ -41,5 +51,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #app.include_router(router, tags=["northwind"])
+    # app.include_router(router, tags=["northwind"])
     uvicorn.run(app)
