@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, PositiveInt, constr
 
 
@@ -27,11 +29,11 @@ class Category(BaseModel):
 
 
 class Supplier(BaseModel):
-    CompanyName: constr(max_length=40)
-    ContactName: constr(max_length=40)
-    ContactTitle: constr(max_length=40)
-    Address: constr(max_length=40)
-    City: constr(max_length=40)
-    PostalCode: constr(max_length=40)
-    Country: constr(max_length=40)
-    Phone: constr(max_length=40)
+    CompanyName: Optional[(constr(max_length=40))]
+    ContactName: Optional[constr(max_length=40)]
+    ContactTitle: Optional[constr(max_length=40)]
+    Address: Optional[constr(max_length=40)]
+    City: Optional[constr(max_length=40)]
+    PostalCode: Optional[constr(max_length=40)]
+    Country: Optional[constr(max_length=40)]
+    Phone: Optional[constr(max_length=40)]
