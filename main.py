@@ -12,7 +12,7 @@ app = FastAPI()
 router = APIRouter()
 
 
-@router.get("/shippers/{shipper_id}", response_model=schemas.Shipper)
+@app.get("/shippers/{shipper_id}")
 async def get_shipper(shipper_id: PositiveInt, db: Session = Depends(get_db)):
     db_shipper = crud.get_shipper(db, shipper_id)
     if db_shipper is None:
@@ -20,7 +20,7 @@ async def get_shipper(shipper_id: PositiveInt, db: Session = Depends(get_db)):
     return db_shipper
 
 
-@router.get("/suppliers")
+@app.get("/suppliers")
 async def get_suppliers(db: Session = Depends(get_db)):
     db_supps = crud.get_suppliers(db)
     if db_supps is None:
@@ -28,7 +28,7 @@ async def get_suppliers(db: Session = Depends(get_db)):
     return db_supps
 
 
-@router.get("/suppliers/{id}")
+@app.get("/suppliers/{id}")
 async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
     db_supps = crud.get_supplier(db, id)
     if db_supps is None:
@@ -41,5 +41,5 @@ def main():
 
 
 if __name__ == '__main__':
-    app.include_router(router, tags=["northwind"])
+    #app.include_router(router, tags=["northwind"])
     uvicorn.run(app)
