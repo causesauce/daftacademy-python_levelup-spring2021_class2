@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, update
 from sqlalchemy.orm import Session
 
 import models
@@ -56,3 +56,16 @@ def add_supplier(supplier: schemas.NewSupplier, db: Session):
     db.commit()
 
     return supp
+
+
+def update_supplier(id, supplier_upd, db: Session):
+    if get_supplier(db, id):
+        supp_dict = {key: val for key, val in supplier_upd.dict().items() if val is not None}
+
+        if bool(supp_dict):
+            db.execute(update(models.Supplier).where(models.Supplier.SupplierID == id).values(**supp_dict))
+            db.commit()
+            return get_supplier(db, id)
+
+    return None
+
