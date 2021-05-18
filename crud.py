@@ -36,7 +36,7 @@ def get_products(db, id_sup):
 
 
 def add_supplier(supplier: schemas.NewSupplier, db: Session):
-    id = db.query(func.max(models.Supplier.SupplierID)).one()[0]+1
+    id = db.query(func.max(models.Supplier.SupplierID)).one()[0] + 1
     supp = models.Supplier(
         SupplierID=id,
         CompanyName=supplier.CompanyName,
@@ -65,7 +65,5 @@ def update_supplier(id, supplier_upd, db: Session):
         if bool(supp_dict):
             db.execute(update(models.Supplier).where(models.Supplier.SupplierID == id).values(**supp_dict))
             db.commit()
-            return get_supplier(db, id)
 
-    return None
-
+    return get_supplier(db, id)
