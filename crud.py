@@ -35,9 +35,10 @@ def get_products(db, id_sup):
     return a
 
 
-def add_supplier(supplier: schemas.Supplier, db: Session):
+def add_supplier(supplier: schemas.NewSupplier, db: Session):
+    id = db.query(func.max(models.Supplier.SupplierID)).one()[0]+1
     supp = models.Supplier(
-        SupplierID= db.query(func.max(models.Supplier.SupplierID)).one()[0]+1,
+        SupplierID=id,
         CompanyName=supplier.CompanyName,
         ContactName=supplier.ContactName,
         ContactTitle=supplier.ContactTitle,
@@ -50,7 +51,8 @@ def add_supplier(supplier: schemas.Supplier, db: Session):
         Fax=None,
         HomePage=None
     )
+
     db.add(supp)
     db.commit()
 
-    return supplier
+    return supp
