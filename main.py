@@ -12,7 +12,7 @@ app = FastAPI()
 router = APIRouter()
 
 
-@app.get("/shippers/{shipper_id}")
+@app.get("/shippers/{shipper_id}", response_model=schemas.Shipper)
 async def get_shipper(shipper_id: PositiveInt, db: Session = Depends(get_db)):
     db_shipper = crud.get_shipper(db, shipper_id)
     if db_shipper is None:
