@@ -108,9 +108,11 @@ async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404)
     return db_supps
 
-@app.post("/suppliers", status_code=201)
+
+@app.post("/suppliers", status_code=201, response_model=schemas.Supplier)
 async def post_supplier(supplier: schemas.Supplier, db: Session = Depends(get_db)):
-    crud.add_supplier(supplier, db)
+    return crud.add_supplier(supplier, db)
+
 
 
 def main():
