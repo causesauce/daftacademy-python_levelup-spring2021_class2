@@ -127,6 +127,17 @@ async def put_supplier(id: PositiveInt, supplier_upd: Optional[schemas.UpdateSup
         raise HTTPException(status_code=404)
 
 
+@app.delete("/suppliers/{id}", status_code=204)
+def delete_supplier(id: PositiveInt, db: Session = Depends(get_db)):
+    db_supps = crud.get_supplier(db, id)
+    if db_supps is None:
+        raise HTTPException(status_code=404)
+    item = db.query(models.Supplier).filter(models.Supplier.SupplierID == id).one()
+    db.delete(item)
+    db.commit()
+    return None
+
+
 def main():
     pass
 
