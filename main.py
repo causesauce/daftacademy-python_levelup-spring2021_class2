@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 import crud
 import schemas
+import models
 from db import get_db
 
 app = FastAPI()
@@ -110,9 +111,9 @@ async def get_supplier(id: PositiveInt, db: Session = Depends(get_db)):
 
 
 @app.post("/suppliers", status_code=201, response_model=schemas.Supplier)
-async def post_supplier(supplier: schemas.Supplier, db: Session = Depends(get_db)):
-    return crud.add_supplier(supplier, db)
-
+async def post_supplier(supplier: schemas.NewSupplier, db: Session = Depends(get_db)):
+    supp = crud.add_supplier(supplier, db)
+    return supp
 
 
 def main():
