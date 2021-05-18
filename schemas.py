@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, PositiveInt, constr
 
 
@@ -14,6 +13,14 @@ class Shipper(BaseModel):
 class SuppliersShort(BaseModel):
     SupplierID: PositiveInt
     CompanyName: constr(max_length=40)
+
+    class Config:
+        orm_mode = True
+
+
+class Category(BaseModel):
+    CategoryID: PositiveInt
+    CategoryName: constr(max_length=40)
 
     class Config:
         orm_mode = True
