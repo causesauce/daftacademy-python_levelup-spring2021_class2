@@ -1,5 +1,6 @@
 # coding: utf-8
-from sqlalchemy import Column, Date, Float, Integer, LargeBinary, SmallInteger, String, Table, Text
+from sqlalchemy import Column, Date, Float, Integer, LargeBinary, SmallInteger, String, Table, Text, ForeignKey, text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import NullType
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -14,6 +15,8 @@ class Category(Base):
     CategoryName = Column(String(15), nullable=False)
     Description = Column(Text)
     Picture = Column(LargeBinary)
+
+    product = relationship("Product", back_populates="category")
 
 
 class Customercustomerdemo(Base):
@@ -110,14 +113,16 @@ class Product(Base):
 
     ProductID = Column(SmallInteger, primary_key=True)
     ProductName = Column(String(40), nullable=False)
-    SupplierID = Column(SmallInteger)
-    CategoryID = Column(SmallInteger)
+    SupplierID = Column(SmallInteger, ForeignKey("suppliers.SupplierID"))
+    CategoryID = Column(SmallInteger, ForeignKey("categories.CategoryID"))
     QuantityPerUnit = Column(String(20))
     UnitPrice = Column(Float)
     UnitsInStock = Column(SmallInteger)
     UnitsOnOrder = Column(SmallInteger)
     ReorderLevel = Column(SmallInteger)
     Discontinued = Column(Integer, nullable=False)
+
+    category = relationship("Category", back_populates="product")
 
 
 class Region(Base):
@@ -146,7 +151,7 @@ class ShippersTmp(Base):
 class Supplier(Base):
     __tablename__ = 'suppliers'
 
-    SupplierID = Column(SmallInteger, primary_key=True)
+    SupplierID = Column(SmallInteger, primary_key=True, server_default=text("nextval('suppliers_supplierid_seq'::regclass)"))
     CompanyName = Column(String(40), nullable=False)
     ContactName = Column(String(30))
     ContactTitle = Column(String(30))
