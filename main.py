@@ -116,6 +116,15 @@ async def post_supplier(supplier: schemas.NewSupplier, db: Session = Depends(get
     return supp
 
 
+@app.put("/suppliers/{id}")
+async def put_supplier(id: PositiveInt, supplier_upd: schemas.UpdateSupplier, db: Session = Depends(get_db)):
+    result = crud.update_supplier(id, supplier_upd, db)
+    if result:
+        return result
+    else:
+        raise HTTPException(status_code=404)
+
+
 def main():
     pass
 
